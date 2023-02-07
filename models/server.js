@@ -46,17 +46,10 @@ class Server {
 
 		// Directorio Público
 		this.app.use(express.static(this.pathPublic));
-		this.app.use(
-			fileUpload({
-				limits: { fileSize: 50 * 1024 * 1024 },
-			})
-		);
+		this.app.use(fileUpload());
 	}
 
 	routes() {
-		this.app.get('*', (req, res) => {
-			res.sendFile(this.pathPublic + '/index.html');
-		});
 		this.app.get('/getIp', (req, res) => {
 			res.setHeader('Access-Control-Allow-Origin', '*');
 			res.json({
@@ -64,6 +57,9 @@ class Server {
 			});
 		});
 		this.app.post('/api/addItem', UploadFile);
+		this.app.get('*', (req, res) => {
+			res.sendFile(this.pathPublic + '/index.html');
+		});
 	}
 
 	sockets() {

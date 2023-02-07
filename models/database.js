@@ -1,7 +1,6 @@
 const sqlite3 = require('sqlite3');
 const fs = require('fs');
 const DB_NAME = 'database.db';
-
 var db;
 
 function createDB() {
@@ -82,7 +81,12 @@ function CreateTableIngredient() {
 	);
 }
 
+function GetDB() {
+	return db;
+}
+
 module.exports = {
 	InitDB,
 	CloseDB,
+	GetDB,
 };
