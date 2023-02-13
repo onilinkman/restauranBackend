@@ -6,7 +6,7 @@ const fileUpload = require('express-fileupload');
 
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
-const { UploadFile } = require('./uploads');
+const { UploadFile,GetMenu,GetRecetas } = require('./uploads');
 
 class Server {
 	constructor(pathPublic, port, dirFiles) {
@@ -57,6 +57,12 @@ class Server {
 			});
 		});
 		this.app.post('/api/addItem', UploadFile);
+		this.app.get('/api/getMenu',GetMenu)
+		this.app.get('/api/recetas',GetRecetas)
+		this.app.get('/uploads/imgMenu',(req,res)=>{
+			console.log(req.query)
+			res.sendFile(path.join(__dirname,"../uploads","imgMenu",req.query.img))
+		})
 		this.app.get('*', (req, res) => {
 			res.sendFile(this.pathPublic + '/index.html');
 		});
