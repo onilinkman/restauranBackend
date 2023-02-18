@@ -21,6 +21,8 @@ function InitDB() {
 	}
 	CreateTableMenu();
 	CreateTableIngredient();
+	CreateTableSection();
+	CreateTableMenuSection();
 }
 
 function ConnectDB() {
@@ -77,6 +79,46 @@ function CreateTableIngredient() {
 				console.error('error: ', err.message);
 			}
 			console.log('Tabla Ingredient creada');
+		}
+	);
+}
+
+function CreateTableSection() {
+	db.run(
+		`CREATE TABLE IF NOT EXISTS section(
+			id_section INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			description TEXT,
+			is_deleted INTEGER DEFAULT 1)`,
+		(err) => {
+			if (err) {
+				console.error('error to create table section', err.message);
+			} else {
+				console.log('Tabla section creada');
+			}
+		}
+	);
+}
+
+function CreateTableMenuSection() {
+	db.run(
+		`CREATE TABLE IF NOT EXISTS menu_section(
+			id_menu INTEGER NOT NULL,
+			id_section INTEGER NOT NULL,
+			FOREIGN KEY (id_menu)
+				REFERENCES menu (id_menu),
+			FOREIGN KEY (id_section)
+				REFERENCES section (id_section)
+		)`,
+		(err) => {
+			if (err) {
+				console.error(
+					'error to create table menu_section',
+					err.message
+				);
+			} else {
+				console.log('Tabla menu_section create');
+			}
 		}
 	);
 }

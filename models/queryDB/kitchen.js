@@ -64,7 +64,79 @@ function GetRecetasDB(callback) {
 	);
 }
 
+/**
+ * Add in database a row in tabke section
+ * @param {String} name
+ * @param {String} description
+ * @param {function} callback
+ */
+function AddSection(name, description, callback) {
+	let db = GetDB();
+	db.run(
+		`INSERT INTO section(name,description) VALUES(?,?)`,
+		[name, description],
+		function (err) {
+			if (err) {
+				return console.error('Error addSection:', err.message);
+			}
+			callback();
+		}
+	);
+}
+
+/**
+ * Get all rows from section table
+ * @param {function} callback
+ */
+function GetSectionDB(callback) {
+	let db = GetDB();
+	db.all(
+		`SELECT id_section,name,description,is_deleted FROM section`,
+		[],
+		function (err, rows) {
+			if (err) {
+				return console.error('Error GetSectionDB', err.message);
+			}
+			callback(rows);
+		}
+	);
+}
+
+/**
+ * update section table and get all rows from table
+ * @param {number} id_section 
+ * @param {String} name 
+ * @param {String} description 
+ * @param {function} callback 
+ */
+function UpdateSection(id_section, name, description, callback) {
+	let db = GetDB();
+	db.run('BEGIN TRANSACTION');
+	db.run(
+		'UPDATE section SET name=?,description=? WHERE id_section=?',
+		[name, description, id_section],
+		function (err) {
+			if (err) {
+				return db.run('ROLLBACK');
+			}
+			db.all(
+				'SELECT id_section,name,description,is_deleted FROM section',
+				function (err, rows) {
+					if (err) {
+						return db.run('ROLLBACK');
+					}
+					db.run('COMMIT');
+					callback(rows);
+				}
+			);
+		}
+	);
+}
+
 module.exports = {
 	AddItem,
 	GetRecetasDB,
+	AddSection,
+	GetSectionDB,
+	UpdateSection,
 };
