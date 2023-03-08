@@ -2,6 +2,7 @@ const sqlite3 = require('sqlite3');
 const fs = require('fs');
 const DB_NAME = 'database.db';
 var db;
+var is_off_Transaction = true;
 
 function createDB() {
 	db = new sqlite3.Database(DB_NAME, (err) => {
@@ -28,7 +29,7 @@ function InitDB() {
 function ConnectDB() {
 	db = new sqlite3.Database(DB_NAME, (err) => {
 		if (err) {
-			console.error(err.message);
+			console.error('error al conectar', err.message);
 		}
 	});
 	console.log('conectado a la base de datos');
@@ -127,8 +128,18 @@ function GetDB() {
 	return db;
 }
 
+function IsOffTransaction() {
+	return is_off_Transaction;
+}
+
+function SetTransaction(value) {
+	is_off_Transaction = value;
+}
+
 module.exports = {
 	InitDB,
 	CloseDB,
 	GetDB,
+	IsOffTransaction,
+	SetTransaction,
 };

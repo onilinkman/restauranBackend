@@ -7,7 +7,16 @@ const fileUpload = require('express-fileupload');
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
 const { UploadFile, GetMenu, GetRecetas } = require('./uploads');
-const { PostSection, GetSection, PutSection } = require('./api/kitchen');
+const {
+	PostSection,
+	GetSection,
+	PutSection,
+	DeleteSection,
+	GetSectionNotDeleted,
+	GetMenu_Section,
+	PostMenuSection,
+	DeleteMenuSection,
+} = require('./api/kitchen');
 
 class Server {
 	constructor(pathPublic, port, dirFiles) {
@@ -49,7 +58,7 @@ class Server {
 		this.app.use(express.static(this.pathPublic));
 		this.app.use(fileUpload());
 
-		this.app.use(express.json())
+		this.app.use(express.json());
 	}
 
 	routes() {
@@ -63,12 +72,25 @@ class Server {
 		this.app.get('/api/getMenu', GetMenu);
 		this.app.get('/api/recetas', GetRecetas);
 		this.app.post('/api/addSection', PostSection);
-		this.app.get('/api/getSections',GetSection)
-		this.app.put('/api/updateSection',PutSection)
+		this.app.get('/api/getSections', GetSection);
+		this.app.get('/api/getSectionNotDeleted', GetSectionNotDeleted);
+		this.app.put('/api/updateSection', PutSection);
+		this.app.delete('/api/deleteSection', DeleteSection);
+		this.app.get('/api/getMenuSection', GetMenu_Section);
+		this.app.post('/api/postMenuSection', PostMenuSection);
+		this.app.delete('/api/deleteMenuSection',DeleteMenuSection);
 		this.app.get('/uploads/imgMenu', (req, res) => {
-			res.sendFile(
-				path.join(__dirname, '../uploads', 'imgMenu', req.query.img)
+			let p = path.join(
+				__dirname,
+				'../uploads',
+				'imgMenu',
+				req.query.img
 			);
+			if (fs.existsSync(p)) {
+				res.sendFile(p);
+			} else {
+				res.sendStatus(404);
+			}
 		});
 		this.app.get('*', (req, res) => {
 			res.sendFile(this.pathPublic + '/index.html');

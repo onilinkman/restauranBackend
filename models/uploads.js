@@ -1,55 +1,65 @@
 const { response, request } = require('express');
 const { AddItem, GetRecetasDB } = require('./queryDB/kitchen');
+const { IsOffTransaction, SetTransaction } = require('./database');
 const path = require('path');
 const fs = require('fs');
 
 const UploadFile = (req, res = response) => {
-	const validedExtends = ['png', 'jpg', 'jpeg', 'gif'];
+	console.log(IsOffTransaction());
+	if (IsOffTransaction()) {
+		SetTransaction(false);
+		const validedExtends = ['png', 'jpg', 'jpeg', 'gif'];
 
-	const obj = req.body;
-	let image = req.files?.image;
-	let type = '';
-	if (image) {
-		let name = image.name;
-		let ext = name.split('.');
-		type = ext[ext.length - 1];
-	}
-	AddItem(
-		obj.title,
-		obj.description,
-		obj.ingredients,
-		obj.price,
-		'.' + type,
-		(cad) => {
-			if (!req.files || Object.keys(req.files).length === 0) {
-				//when no upload a file in body
-				return res.sendStatus(204);
-			}
-
-			if (!validedExtends.includes(type)) {
-				return res.sendStatus(204);
-			}
-
-			if (image) {
-				let uploadPath = path.join(
-					__dirname,
-					'../uploads',
-					'imgMenu',
-					cad
-				);
-
-				image.mv(uploadPath, (err) => {
-					if (err) {
-						return res.sendStatus(204);
-					}
-
-					res.status(200).json({
-						msg: 'el archivo se subio a: ' + uploadPath,
-					});
-				});
-			}
+		const obj = req.body;
+		let image = req.files?.image;
+		let type = '';
+		if (image) {
+			let name = image.name;
+			let ext = name.split('.');
+			type = ext[ext.length - 1];
 		}
-	);
+		AddItem(
+			obj.title,
+			obj.description,
+			obj.ingredients,
+			obj.price,
+			'.' + type,
+			(cad) => {
+				if (!req.files || Object.keys(req.files).length === 0) {
+					//when no upload a file in body
+					SetTransaction(true);
+					return res.sendStatus(204);
+				}
+
+				if (!validedExtends.includes(type)) {
+					SetTransaction(true);
+					return res.sendStatus(204);
+				}
+
+				if (image) {
+					let uploadPath = path.join(
+						__dirname,
+						'../uploads',
+						'imgMenu',
+						cad
+					);
+
+					image.mv(uploadPath, (err) => {
+						SetTransaction(true);
+						if (err) {
+							return res.sendStatus(204);
+						}
+
+						res.status(200).json({
+							msg: 'el archivo se subio a: ' + uploadPath,
+						});
+					});
+				}
+			}
+		);
+	} else {
+		return res.sendStatus(503);
+	}
 };
 
 const GetMenu = (req = request, res = response) => {

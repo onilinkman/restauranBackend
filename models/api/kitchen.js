@@ -3,6 +3,11 @@ const {
 	AddSection,
 	GetSectionDB,
 	UpdateSection,
+	IsDeleteSectionDB,
+	GetSectionStatusDB,
+	GetMenuSection,
+	AddMenuSection,
+	DeleteMenuSectionDB,
 } = require('../queryDB/kitchen');
 
 function PostSection(req = request, res = response) {
@@ -24,11 +29,66 @@ function GetSection(req = request, res = response) {
 	});
 }
 
+function GetSectionNotDeleted(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	GetSectionStatusDB(1, (rows) => {
+		res.json(rows);
+	});
+}
+
 function PutSection(req = request, res = response) {
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	const body = req.body;
 	if (body) {
-		UpdateSection(body.id_section, body.name, body.description, (rows) => {
+		UpdateSection(body.id_section, body.description, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function DeleteSection(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	const body = req.body;
+	if (body) {
+		IsDeleteSectionDB(body.id_section, body.state, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function GetMenu_Section(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let id_section = req.query?.id_section;
+	if (id_section) {
+		GetMenuSection(id_section, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function PostMenuSection(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		AddMenuSection(body.id_menu, body.id_section, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function DeleteMenuSection(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		DeleteMenuSectionDB(body.id_menu, body.id_section, (rows) => {
 			res.json(rows);
 		});
 	} else {
@@ -40,4 +100,9 @@ module.exports = {
 	PostSection,
 	GetSection,
 	PutSection,
+	DeleteSection,
+	GetSectionNotDeleted,
+	GetMenu_Section,
+	PostMenuSection,
+	DeleteMenuSection,
 };
