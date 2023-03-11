@@ -55,7 +55,7 @@ function GetRecetasDB(callback) {
 	let db = GetDB();
 	db.all(
 		`SELECT m.id_menu,m.title, m.description,m.url_image,m.price,i.description as desc_ing FROM menu m
-		INNER JOIN ingredient i ON i.id_menu= m.id_menu
+		LEFT JOIN ingredient i ON i.id_menu= m.id_menu
 		WHERE m.is_deleted=1`,
 		(err, rows) => {
 			if (err) {
@@ -98,6 +98,27 @@ function GetSectionDB(callback) {
 		function (err, rows) {
 			if (err) {
 				return console.error('Error GetSectionDB', err.message);
+			}
+			callback(rows);
+		}
+	);
+}
+
+/**
+ * Get a menu and ingredients
+ * @param {int} id_menu
+ * @param {function} callback
+ */
+function GetMenuByIdDB(id_menu = 0, callback) {
+	let db = GetDB();
+	db.all(
+		`SELECT m.title,m.description,m.url_image,m.price,
+		i.id_ingredient,i.description as ingredient FROM menu m
+		LEFT JOIN ingredient i ON m.id_menu=i.id_menu WHERE m.id_menu=?`,
+		[id_menu],
+		function (err, rows) {
+			if (err) {
+				return console.error('Error GetMenuByIdDB', err.message);
 			}
 			callback(rows);
 		}
@@ -234,7 +255,7 @@ function DeleteMenuSectionDB(id_menu, id_section, callback) {
 	//db.run(`BEGIN IMMEDIATE TRANSACTION`);
 	db.run(
 		`DELETE FROM menu_section
-		WHERE id_menu=? AND id_section=?`,
+			WHERE id_menu=? AND id_section=?`,
 		[id_menu, id_section],
 		function (err) {
 			if (err) {
@@ -242,9 +263,9 @@ function DeleteMenuSectionDB(id_menu, id_section, callback) {
 			}
 			db.all(
 				`SELECT DISTINCT m.id_menu,m.title as name, ifnull(ms.id_section,0) as id_section FROM menu m
-				LEFT JOIN menu_section ms ON ms.id_menu=m.id_menu AND ms.id_section=?
-				LEFT JOIN section s ON s.id_section=ms.id_section AND s.is_deleted=1 
-				WHERE m.is_deleted=1`,
+					LEFT JOIN menu_section ms ON ms.id_menu=m.id_menu AND ms.id_section=?
+					LEFT JOIN section s ON s.id_section=ms.id_section AND s.is_deleted=1 
+					WHERE m.is_deleted=1`,
 				[id_section],
 				function (err, rows) {
 					if (err) {
@@ -258,6 +279,63 @@ function DeleteMenuSectionDB(id_menu, id_section, callback) {
 	);
 }
 
+function DeleteIngredientDB(id_ingredient, id_menu, callback) {
+	let db = GetDB();
+	if (db) {
+		db.serialize(function () {
+			db.run(
+				`DELETE FROM ingredient 
+			WHERE id_menu=? AND id_ingredient=?`,
+				[id_menu, id_ingredient],
+				function (err) {
+					if (err) {
+						return;
+					}
+					db.all(
+						`SELECT id_ingredient,description as ingredient FROM ingredient 
+				WHERE id_menu=?`,
+						[id_menu],
+						function (err, rows) {
+							if (err) {
+								return;
+							}
+							callback(rows);
+						}
+					);
+				}
+			);
+		});
+	}
+}
+
+function InsertIngredientDB(id_menu, description, callback) {
+	let db = GetDB();
+	if (db) {
+		db.serialize(function () {
+			db.run(
+				`INSERT INTO ingredient(description,id_menu) VALUES(?,?)`,
+				[description, id_menu],
+				function (err) {
+					if (err) {
+						return;
+					}
+					db.all(
+						`SELECT id_ingredient,description as ingredient FROM ingredient 
+			WHERE id_menu=?`,
+						[id_menu],
+						function (err, rows) {
+							if (err) {
+								return;
+							}
+							callback(rows);
+						}
+					);
+				}
+			);
+		});
+	}
+}
+
 module.exports = {
 	AddItem,
 	GetRecetasDB,
@@ -269,4 +347,7 @@ module.exports = {
 	GetMenuSection,
 	AddMenuSection,
 	DeleteMenuSectionDB,
+	GetMenuByIdDB,
+	DeleteIngredientDB,
+	InsertIngredientDB,
 };

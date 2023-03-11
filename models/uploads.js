@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs');
 
 const UploadFile = (req, res = response) => {
-	console.log(IsOffTransaction());
 	if (IsOffTransaction()) {
 		SetTransaction(false);
 		const validedExtends = ['png', 'jpg', 'jpeg', 'gif'];

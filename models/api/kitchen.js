@@ -8,6 +8,9 @@ const {
 	GetMenuSection,
 	AddMenuSection,
 	DeleteMenuSectionDB,
+	GetMenuByIdDB,
+	DeleteIngredientDB,
+	InsertIngredientDB,
 } = require('../queryDB/kitchen');
 
 function PostSection(req = request, res = response) {
@@ -19,6 +22,19 @@ function PostSection(req = request, res = response) {
 		});
 	} else {
 		res.sendStatus(500);
+	}
+}
+
+function GetMenuById(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+
+	let id_menu = req.query?.id_menu;
+	if (id_menu) {
+		GetMenuByIdDB(id_menu, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(406);
 	}
 }
 
@@ -96,6 +112,30 @@ function DeleteMenuSection(req = request, res = response) {
 	}
 }
 
+function DeleteIngredient(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		DeleteIngredientDB(body.id_ingredient, body.id_menu, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function InsertIngredient(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		InsertIngredientDB(body.id_menu, body.description, (rows) => {
+			res.json(rows);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
 module.exports = {
 	PostSection,
 	GetSection,
@@ -105,4 +145,7 @@ module.exports = {
 	GetMenu_Section,
 	PostMenuSection,
 	DeleteMenuSection,
+	GetMenuById,
+	DeleteIngredient,
+	InsertIngredient,
 };

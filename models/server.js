@@ -16,6 +16,9 @@ const {
 	GetMenu_Section,
 	PostMenuSection,
 	DeleteMenuSection,
+	GetMenuById,
+	DeleteIngredient,
+	InsertIngredient,
 } = require('./api/kitchen');
 
 class Server {
@@ -78,7 +81,10 @@ class Server {
 		this.app.delete('/api/deleteSection', DeleteSection);
 		this.app.get('/api/getMenuSection', GetMenu_Section);
 		this.app.post('/api/postMenuSection', PostMenuSection);
-		this.app.delete('/api/deleteMenuSection',DeleteMenuSection);
+		this.app.delete('/api/deleteMenuSection', DeleteMenuSection);
+		this.app.get('/api/getMenuById', GetMenuById);
+		this.app.delete('/api/deleteIngredient', DeleteIngredient);
+		this.app.post('/api/addIngredient', InsertIngredient);
 		this.app.get('/uploads/imgMenu', (req, res) => {
 			let p = path.join(
 				__dirname,
