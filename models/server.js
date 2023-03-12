@@ -6,7 +6,7 @@ const fileUpload = require('express-fileupload');
 
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
-const { UploadFile, GetMenu, GetRecetas } = require('./uploads');
+const { UploadFile, GetMenu, GetRecetas, UpdateImage } = require('./uploads');
 const {
 	PostSection,
 	GetSection,
@@ -19,6 +19,7 @@ const {
 	GetMenuById,
 	DeleteIngredient,
 	InsertIngredient,
+	PutIngredient,
 } = require('./api/kitchen');
 
 class Server {
@@ -85,6 +86,8 @@ class Server {
 		this.app.get('/api/getMenuById', GetMenuById);
 		this.app.delete('/api/deleteIngredient', DeleteIngredient);
 		this.app.post('/api/addIngredient', InsertIngredient);
+		this.app.put('/api/putIngredient', PutIngredient);
+		this.app.put('/api/updateImage', UpdateImage);
 		this.app.get('/uploads/imgMenu', (req, res) => {
 			let p = path.join(
 				__dirname,

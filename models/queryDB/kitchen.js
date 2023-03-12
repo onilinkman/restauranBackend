@@ -336,6 +336,37 @@ function InsertIngredientDB(id_menu, description, callback) {
 	}
 }
 
+function UpdateIngredientDB(id_menu, description, callback) {
+	let db = GetDB();
+	if (db) {
+		if (description) {
+			db.run(
+				'UPDATE menu SET description=? WHERE id_menu=?',
+				[description, id_menu],
+				function (err) {
+					if (err) {
+						return;
+					}
+					callback();
+				}
+			);
+		}
+	}
+}
+
+function UpdateIngredientImg(id_menu, url_image, callback) {
+	let db = GetDB();
+	if (db) {
+		db.run(
+			'UPDATE menu SET url_image=? WHERE id_menu=?',
+			[url_image, id_menu],
+			function (err) {
+				callback(err);
+			}
+		);
+	}
+}
+
 module.exports = {
 	AddItem,
 	GetRecetasDB,
@@ -350,4 +381,6 @@ module.exports = {
 	GetMenuByIdDB,
 	DeleteIngredientDB,
 	InsertIngredientDB,
+	UpdateIngredientDB,
+	UpdateIngredientImg,
 };

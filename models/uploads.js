@@ -1,10 +1,14 @@
 const { response, request } = require('express');
-const { AddItem, GetRecetasDB } = require('./queryDB/kitchen');
+const {
+	AddItem,
+	GetRecetasDB,
+	UpdateIngredientImg,
+} = require('./queryDB/kitchen');
 const { IsOffTransaction, SetTransaction } = require('./database');
 const path = require('path');
 const fs = require('fs');
 
-const UploadFile = (req, res = response) => {
+const UploadFile = async (req, res = response) => {
 	if (IsOffTransaction()) {
 		SetTransaction(false);
 		const validedExtends = ['png', 'jpg', 'jpeg', 'gif'];
@@ -58,6 +62,55 @@ const UploadFile = (req, res = response) => {
 		);
 	} else {
 		return res.sendStatus(503);
+	}
+};
+
+const UpdateImage = async (req = request, res = response) => {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	const validedExtends = ['png', 'jpg', 'jpeg', 'gif'];
+	const obj = req.body;
+	let image = req.files?.image;
+	let type = '';
+	let img_name = obj.url_image;
+	let id_menu = obj.id_menu;
+	if (image) {
+		let name = image.name;
+		let ext = name.split('.');
+		type = type.concat(id_menu, '.', ext[ext.length - 1]);
+		if (validedExtends.includes(ext[ext.length - 1])) {
+			let updatePath = path.join(
+				__dirname,
+				'../uploads',
+				'imgMenu',
+				type
+			);
+			let beforePath = path.join(
+				__dirname,
+				'../uploads',
+				'imgMenu',
+				img_name
+			);
+			UpdateIngredientImg(id_menu, type, (err) => {
+				if (err) {
+					res.sendStatus(500);
+				}
+				if (img_name !== '' && img_name && fs.existsSync(beforePath)) {
+					fs.unlinkSync(beforePath);
+				}
+				image.mv(updatePath, (erro) => {
+					if (erro) {
+						return res.sendStatus(406);
+					}
+					res.json({
+						newUrl_img: type,
+					});
+				});
+			});
+		} else {
+			res.sendStatus(406);
+		}
+	} else {
+		res.sendStatus(406);
 	}
 };
 
@@ -119,4 +172,5 @@ module.exports = {
 	UploadFile,
 	GetMenu,
 	GetRecetas,
+	UpdateImage,
 };

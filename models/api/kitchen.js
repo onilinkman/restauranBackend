@@ -11,6 +11,7 @@ const {
 	GetMenuByIdDB,
 	DeleteIngredientDB,
 	InsertIngredientDB,
+	UpdateIngredientDB,
 } = require('../queryDB/kitchen');
 
 function PostSection(req = request, res = response) {
@@ -136,6 +137,18 @@ function InsertIngredient(req = request, res = response) {
 	}
 }
 
+function PutIngredient(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		UpdateIngredientDB(body.id_menu, body.description, () => {
+			res.sendStatus(200);
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
 module.exports = {
 	PostSection,
 	GetSection,
@@ -148,4 +161,5 @@ module.exports = {
 	GetMenuById,
 	DeleteIngredient,
 	InsertIngredient,
+	PutIngredient,
 };
