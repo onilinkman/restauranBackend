@@ -1,5 +1,4 @@
 const { GetDB } = require('../database');
-const async = require('async');
 
 const AddItem = (title, description, ingredients, price, type, callback) => {
 	let db = GetDB();
@@ -367,6 +366,33 @@ function UpdateIngredientImg(id_menu, url_image, callback) {
 	}
 }
 
+function UpdatePriceDB(id_menu, price = 0, callback) {
+	let db = GetDB();
+	if (db) {
+		db.run(
+			'UPDATE menu SET price=? WHERE id_menu=?',
+			[price, id_menu],
+			function (err) {
+				callback(err);
+			}
+		);
+	}
+}
+
+function DeleteItemDB(id_menu, callback) {
+	let db = GetDB();
+	if (db) {
+		db.run(
+			'UPDATE menu SET is_deleted=0 WHERE id_menu=?',
+			[id_menu],
+			function (err) {
+				callback(err);
+			}
+		);
+	}
+}
+
+
 module.exports = {
 	AddItem,
 	GetRecetasDB,
@@ -383,4 +409,6 @@ module.exports = {
 	InsertIngredientDB,
 	UpdateIngredientDB,
 	UpdateIngredientImg,
+	UpdatePriceDB,
+	DeleteItemDB,
 };

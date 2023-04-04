@@ -6,6 +6,7 @@ const fileUpload = require('express-fileupload');
 
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
+const {validateJWT}=require('./middlewares/jwt')
 const { UploadFile, GetMenu, GetRecetas, UpdateImage } = require('./uploads');
 const {
 	PostSection,
@@ -20,7 +21,12 @@ const {
 	DeleteIngredient,
 	InsertIngredient,
 	PutIngredient,
+	PutPriceIngredient,
+	DeleteItem,
 } = require('./api/kitchen');
+
+const { GetIdsMenuBySection } = require('./api/menu');
+const { LoginUsername } = require('./api/user');
 
 class Server {
 	constructor(pathPublic, port, dirFiles) {
@@ -88,6 +94,14 @@ class Server {
 		this.app.post('/api/addIngredient', InsertIngredient);
 		this.app.put('/api/putIngredient', PutIngredient);
 		this.app.put('/api/updateImage', UpdateImage);
+		this.app.put('/api/putPriceIngredient', PutPriceIngredient);
+		this.app.delete('/api/deleteItem', DeleteItem);
+		//ENDPOINT FOR MENU
+		this.app.get('/api/getIdsMenuBySection', GetIdsMenuBySection);
+		//ENDPOINT FOR USERS
+		this.app.post('/api/auth/login', [validateJWT,LoginUsername]);
+		//#####################################################
+		//#####################################################
 		this.app.get('/uploads/imgMenu', (req, res) => {
 			let p = path.join(
 				__dirname,

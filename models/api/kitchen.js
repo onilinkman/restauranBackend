@@ -12,6 +12,8 @@ const {
 	DeleteIngredientDB,
 	InsertIngredientDB,
 	UpdateIngredientDB,
+	UpdatePriceDB,
+	DeleteItemDB,
 } = require('../queryDB/kitchen');
 
 function PostSection(req = request, res = response) {
@@ -149,6 +151,38 @@ function PutIngredient(req = request, res = response) {
 	}
 }
 
+function PutPriceIngredient(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		UpdatePriceDB(body.id_menu, body.price, (err) => {
+			if (err) {
+				res.sendStatus(500);
+			} else {
+				res.sendStatus(200);
+			}
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
+function DeleteItem(req = request, res = response) {
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	let body = req.body;
+	if (body) {
+		DeleteItemDB(body.id_menu, (err) => {
+			if (err) {
+				res.sendStatus(500);
+			} else {
+				res.sendStatus(200);
+			}
+		});
+	} else {
+		res.sendStatus(500);
+	}
+}
+
 module.exports = {
 	PostSection,
 	GetSection,
@@ -162,4 +196,6 @@ module.exports = {
 	DeleteIngredient,
 	InsertIngredient,
 	PutIngredient,
+	PutPriceIngredient,
+	DeleteItem,
 };
