@@ -99,7 +99,7 @@ class Server {
 		//ENDPOINT FOR MENU
 		this.app.get('/api/getIdsMenuBySection', GetIdsMenuBySection);
 		//ENDPOINT FOR USERS
-		this.app.post('/api/auth/login', [validateJWT,LoginUsername]);
+		this.app.post('/api/auth/login', [LoginUsername]);
 		//#####################################################
 		//#####################################################
 		this.app.get('/uploads/imgMenu', (req, res) => {

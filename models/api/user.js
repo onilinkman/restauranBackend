@@ -3,7 +3,7 @@ const { request, response } = require('express');
 const jwt = require('jsonwebtoken');
 
 const { LoginUsernameDB } = require('../queryDB/user');
-const PUBLICKEY='2H5dffn4.516Hrfg8GDc56@byfg55Rsb'
+const PUBLICKEY = '2H5dffn4.516Hrfg8GDc56@byfg55Rsb';
 
 const generateJWT = (uuid = '') => {
 	return new Promise((resolve, reject) => {
@@ -44,7 +44,11 @@ const LoginUsername = async (req = request, res = response) => {
 							if (err) {
 								res.sendStatus(503);
 							} else if (result) {
-								const token =await generateJWT(rows[0]);
+								const token = await generateJWT({
+									id_user: rows[0].id_user,
+									username: rows[0].username,
+									id_rol: rows[0].id_rol,
+								});
 								res.status(200).json({
 									username: rows[0].username,
 									token,
