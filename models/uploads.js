@@ -132,7 +132,7 @@ const GetMenu = (req = request, res = response) => {
 };
 
 const GetRecetas = (req = request, res = response) => {
-	res.setHeader('Access-Control-Allow-Origin', '*');
+	//res.setHeader('Access-Control-Allow-Origin', '*');
 	GetRecetasDB((rows) => {
 		let arrayRecetas = [];
 		let receta = {

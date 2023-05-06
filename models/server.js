@@ -6,7 +6,7 @@ const fileUpload = require('express-fileupload');
 
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
-const {validateJWT}=require('./middlewares/jwt')
+const { validateJWT } = require('./middlewares/jwt');
 const { UploadFile, GetMenu, GetRecetas, UpdateImage } = require('./uploads');
 const {
 	PostSection,
@@ -26,7 +26,15 @@ const {
 } = require('./api/kitchen');
 
 const { GetIdsMenuBySection } = require('./api/menu');
-const { LoginUsername } = require('./api/user');
+const {
+	LoginUsername,
+	AddUserPersonal,
+	GetAllPersonnel,
+	UpdatePersonnelIsActive,
+	GetAccessModulePersonnel,
+	AddAccessModulePersonnel,
+	DeleteAccessModulePersonnel,
+} = require('./api/user');
 
 class Server {
 	constructor(pathPublic, port, dirFiles) {
@@ -73,7 +81,6 @@ class Server {
 
 	routes() {
 		this.app.get('/getIp', (req, res) => {
-			res.setHeader('Access-Control-Allow-Origin', '*');
 			res.json({
 				ip: GetIP(),
 			});
@@ -100,6 +107,24 @@ class Server {
 		this.app.get('/api/getIdsMenuBySection', GetIdsMenuBySection);
 		//ENDPOINT FOR USERS
 		this.app.post('/api/auth/login', [LoginUsername]);
+		this.app.post('/api/addUserPersonal', [validateJWT, AddUserPersonal]);
+		this.app.get('/api/v1/getPersonnel', [validateJWT, GetAllPersonnel]);
+		this.app.post('/api/updatePersonnelIsActive', [
+			validateJWT,
+			UpdatePersonnelIsActive,
+		]);
+		this.app.post('/api/getAccessModulePersonnel', [
+			validateJWT,
+			GetAccessModulePersonnel,
+		]);
+		this.app.post('/api/addAccessModulePersonnel', [
+			validateJWT,
+			AddAccessModulePersonnel,
+		]);
+		this.app.delete('/api/deleteAccessModulePersonnel', [
+			validateJWT,
+			DeleteAccessModulePersonnel,
+		]);
 		//#####################################################
 		//#####################################################
 		this.app.get('/uploads/imgMenu', (req, res) => {

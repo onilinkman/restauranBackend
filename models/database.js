@@ -22,14 +22,10 @@ function InitDB() {
 		createDB();
 		ConnectDB();
 	}
-	CreateTableMenu();
+	launchCreateUserModule();
 	CreateTableIngredient();
 	CreateTableSection();
 	CreateTableMenuSection();
-	launchCreateUserModule();
-	bcrypt.hash('admin', 10).then(function (hash) {
-		console.log('hash', hash);
-	});
 }
 
 function ConnectDB() {
@@ -54,7 +50,7 @@ function CloseDB() {
 	});
 }
 
-function CreateTableMenu() {
+function CreateTableMenu(callback) {
 	db.run(
 		`CREATE TABLE IF NOT EXISTS menu(
 			id_menu INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,10 +61,7 @@ function CreateTableMenu() {
 			is_deleted INTEGER DEFAULT 1
 			)`,
 		(err) => {
-			if (err) {
-				console.error(err.message);
-			}
-			console.log('Tabla jugador Creada');
+			callback(err);
 		}
 	);
 }
@@ -147,31 +140,52 @@ function CreateTableRolUser(callback) {
 	);
 }
 
-function CreateRolDefault() {
+function addRol(id_rol, description, callback) {
 	db.run(
 		`INSERT OR IGNORE INTO rol_user(id_rol,description) VALUES (?,?)`,
-		[1, 'Manager'],
+		[id_rol, description],
 		(err) => {
-			if (err) {
-				console.error('error to insert rol default', err.message);
-			} else {
-				console.log('Rol Manager insert');
-			}
+			callback(err);
 		}
 	);
+}
+
+function CreateRolDefault() {
+	addRol(1, 'Manager', (err) => {
+		if (err) {
+			console.log('error to create manager');
+		} else {
+			addRol(2, 'Staff', (err2) => {
+				if (err2) {
+					console.log('Error to create Staff');
+				} else {
+					addRol(3, 'Client', (err3) => {
+						if (err3) {
+							console.log('Error to create Client');
+						} else {
+							console.log(
+								'Manager, Staff, Client added successfull'
+							);
+						}
+					});
+				}
+			});
+		}
+	});
 }
 
 function CreateTableUser(callback) {
 	db.run(
 		`CREATE TABLE IF NOT EXISTS user(
 		id_user INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT UNIQUE,
-		password TEXT,
+		username TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,
 		first_names TEXT,
 		p_lastname TEXT,
 		m_lastname TEXT,
 		ci TEXT,
 		email TEXT,
+		date_register TEXT DEFAULT (datetime('now')),
 		id_rol INTEGER,
 		is_active INTEGER,
 		FOREIGN KEY (id_rol)
@@ -190,25 +204,109 @@ function CreateTableUser(callback) {
 
 function CreateUserDefault(callback) {
 	db.run(
-		`INSERT OR IGNORE INTO user(id_user,username,password,id_rol) VALUES (1,"admin","$2b$10$u01RQyu2CeLNH.HMf2bDq.OZdfrrfzY1Gllk/mj8jT39CLHa.1H6m",1)`,
+		`INSERT OR IGNORE INTO user(id_user,username,password,id_rol,is_active) VALUES (1,"admin","$2b$10$u01RQyu2CeLNH.HMf2bDq.OZdfrrfzY1Gllk/mj8jT39CLHa.1H6m",1,1)`,
 		(err) => {
 			callback(err);
 		}
 	);
 }
 
+function CreateStateOrder() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS state_order(
+		id_state INTEGER PRIMARY KEY AUTOINCREMENT,
+		description TEXT
+		)`,
+			(err) => {
+				if (err) {
+					reject(err.message);
+				} else {
+					resolve('Table state_order is created');
+				}
+			}
+		);
+	});
+}
+
+function AddStateOrder(id_state, description, callback) {
+	db.run(
+		`INSERT OR IGNORE INTO state_order(id_state,description) VALUES (?,?)`,
+		[id_state, description],
+		(err) => {
+			callback(err);
+		}
+	);
+}
+
+function CreateRowsDefaultStateOrder() {
+	return new Promise((resolve, reject) => {
+		AddStateOrder(1, 'abierto', (err1) => {
+			if (err1) {
+				reject('error to insert Rows', err1.message);
+			} else {
+				AddStateOrder(2, 'cerrado', (err2) => {
+					if (err2) {
+						reject('error to insert Rows', err2.message);
+					} else {
+						AddStateOrder(3, 'en_espera', (err3) => {
+							if (err3) {
+								reject('error to insert Rows', err3.message);
+							} else {
+								resolve('rows inserts in table State_order');
+							}
+						});
+					}
+				});
+			}
+		});
+	});
+}
+
+function CreateTableAccessModule() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS access_module(
+			id_user INTEGER NOT NULL,
+			nro_module INTEGER NOT NULL,
+			FOREIGN KEY (id_user)
+				REFERENCES user (id_user)
+		)`,
+			(err) => {
+				if (err) {
+					reject('Error to create access_module');
+				} else {
+					resolve('Table access_module is created');
+				}
+			}
+		);
+	});
+}
+
 function launchCreateUserModule() {
 	let createModule = new Promise((resolve, reject) => {
-		CreateTableRolUser((err) => {
+		CreateTableMenu((err) => {
 			if (err) {
 				reject(err.message);
 			} else {
-				resolve('Table rol_user create');
+				resolve('Table menu is created');
 			}
 		});
 	});
 
 	createModule
+		.then((result) => {
+			console.log(result);
+			return new Promise((resolve, reject) => {
+				CreateTableRolUser((err) => {
+					if (err) {
+						reject(err.message);
+					} else {
+						resolve('Table rol_user create');
+					}
+				});
+			});
+		})
 		.then((result) => {
 			console.log(result);
 			return new Promise((resolve, reject) => {
@@ -247,6 +345,18 @@ function launchCreateUserModule() {
 					}
 				});
 			});
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateStateOrder();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateRowsDefaultStateOrder();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableAccessModule();
 		})
 		.then((result) => {
 			console.log(result);

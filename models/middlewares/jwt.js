@@ -12,11 +12,9 @@ const validateJWT = (req = request, res = response, next) => {
 		});
 	}
 	try {
-		const payload = jwt.verify(token, PUBLICKEY);
-		console.log(payload);
+		jwt.verify(token, PUBLICKEY);
 		next();
 	} catch (error) {
-		console.log(error);
 		res.status(401).json({
 			msg: 'error in token',
 		});
