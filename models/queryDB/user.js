@@ -29,7 +29,7 @@ function AddUserPersonalDB(user, callback) {
 				user.m_lastname,
 				user.ci,
 				user.email,
-				null,
+				user.id_rol,
 			],
 			(err) => {
 				callback(err);
@@ -38,12 +38,13 @@ function AddUserPersonalDB(user, callback) {
 	}
 }
 
-function GetAllPersonnelDB(callback) {
+function GetAllPersonnelDB(id_rol, callback) {
 	let db = GetDB();
 	if (db) {
 		db.all(
 			`SELECT id_user,username,first_names,p_lastname,m_lastname,ci,email,date_register,id_rol,is_active FROM user
-			WHERE id_rol=2`,
+			WHERE id_rol=?`,
+			[id_rol],
 			(err, rows) => {
 				callback(err, rows);
 			}
@@ -105,6 +106,34 @@ function DeleteAccessModulePersonnelDB(id_user, nro_module, callback) {
 	}
 }
 
+function AddBillClientDB(id_user, callback) {
+	let db = GetDB();
+	if (db) {
+		db.run(
+			`INSERT INTO bill_client(id_user,id_state,is_deleted) 
+		VALUES (?,1,1)`,
+			[id_user],
+			(err) => {
+				callback(err);
+			}
+		);
+	}
+}
+
+function GetBillClientDB(id_user, id_state, is_deleted, callback) {
+	let db = GetDB();
+	if (db) {
+		db.all(
+			`SELECT id_bill_client,date FROM bill_client
+		WHERE id_user=? AND id_state=? AND is_deleted=?`,
+			[id_user, id_state, is_deleted],
+			(err, rows) => {
+				callback(err, rows);
+			}
+		);
+	}
+}
+
 module.exports = {
 	LoginUsernameDB,
 	AddUserPersonalDB,
@@ -113,4 +142,6 @@ module.exports = {
 	GetAccessModulePersonnelDB,
 	AddAccessModulePersonnelDB,
 	DeleteAccessModulePersonnelDB,
+	AddBillClientDB,
+	GetBillClientDB,
 };

@@ -34,6 +34,10 @@ const {
 	GetAccessModulePersonnel,
 	AddAccessModulePersonnel,
 	DeleteAccessModulePersonnel,
+	AddUserClient,
+	GetAllClient,
+	AddBillClient,
+	GetBillClientOpen,
 } = require('./api/user');
 
 class Server {
@@ -124,6 +128,13 @@ class Server {
 		this.app.delete('/api/deleteAccessModulePersonnel', [
 			validateJWT,
 			DeleteAccessModulePersonnel,
+		]);
+		this.app.post('/api/addUserClient', [AddUserClient]);
+		this.app.get('/api/getAllClient', [validateJWT, GetAllClient]);
+		this.app.post('/api/addBillClient', [validateJWT, AddBillClient]);
+		this.app.get('/api/getBillClientOpen', [
+			validateJWT,
+			GetBillClientOpen,
 		]);
 		//#####################################################
 		//#####################################################

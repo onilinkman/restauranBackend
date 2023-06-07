@@ -283,6 +283,104 @@ function CreateTableAccessModule() {
 	});
 }
 
+function CreateTableBillUser() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS bill_user(
+			id_bill_user INTEGER PRIMARY KEY AUTOINCREMENT,
+			id_user INTEGER NOT NULL,
+			date TEXT DEFAULT (datetime('now')),
+			id_state INTEGER NOT NULL,
+			is_deleted INTEGER DEFAULT 1,
+			FOREIGN KEY (id_user)
+				REFERENCES user (id_user),
+			FOREIGN KEY (id_state)
+				REFERENCES state_order (id_state)
+			)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table bill_user');
+				} else {
+					resolve('Table bill_user is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableOrderUser() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS order_user(
+			id_bill_user INTEGER NOT NULL,
+			id_menu INTEGER NOT NULL,
+			price NUMERIC,
+			amount INTEGER,
+			FOREIGN KEY (id_bill_user)
+				REFERENCES bill_user (id_bill_user),
+			FOREIGN KEY (id_menu)
+				REFERENCES menu (id_menu)
+			)`,
+			(err) => {
+				if (err) {
+					reject('Error to create Table order_user');
+				} else {
+					resolve('Table order_user is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableBillClient() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS bill_client(
+			id_bill_client INTEGER PRIMARY KEY AUTOINCREMENT,
+			id_user INTEGER NOT NULL,
+			date TEXT DEFAULT (datetime('now')),
+			id_state INTEGER NOT NULL,
+			is_deleted INTEGER DEFAULT 1,
+			FOREIGN KEY (id_user)
+				REFERENCES user (id_user),
+			FOREIGN KEY (id_state)
+				REFERENCES state_order (id_state)
+			)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table bill_client');
+				} else {
+					resolve('Table bill_client is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableOrderClient() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS order_client(
+			id_bill_client INTEGER NOT NULL,
+			id_menu INTEGER NOT NULL,
+			price NUMERIC,
+			amount INTEGER,
+			FOREIGN KEY (id_bill_client)
+				REFERENCES bill_client (id_bill_client),
+			FOREIGN KEY (id_menu)
+				REFERENCES menu (id_menu)
+			)`,
+			(err) => {
+				if (err) {
+					reject('Error to create Table order_client');
+				} else {
+					resolve('Table order_client is created');
+				}
+			}
+		);
+	});
+}
+
 function launchCreateUserModule() {
 	let createModule = new Promise((resolve, reject) => {
 		CreateTableMenu((err) => {
@@ -357,6 +455,22 @@ function launchCreateUserModule() {
 		.then((result) => {
 			console.log(result);
 			return CreateTableAccessModule();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableBillUser();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableOrderUser();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableBillClient();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableOrderClient();
 		})
 		.then((result) => {
 			console.log(result);

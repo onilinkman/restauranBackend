@@ -10,6 +10,8 @@ const {
 	GetAccessModulePersonnelDB,
 	AddAccessModulePersonnelDB,
 	DeleteAccessModulePersonnelDB,
+	AddBillClientDB,
+	GetBillClientDB,
 } = require('../queryDB/user');
 const PUBLICKEY = '2H5dffn4.516Hrfg8GDc56@byfg55Rsb';
 
@@ -80,46 +82,79 @@ const LoginUsername = async (req = request, res = response) => {
 				}
 			}
 		});
+	} else {
+		res.sendStatus(412);
 	}
+};
+
+const addUser = (body, id_rol, callback) => {
+	bcrypt
+		.hash(body.password, 10)
+		.then((hash) => {
+			let user = {
+				username: body.username,
+				password: hash,
+				first_names: body.first_names,
+				p_lastname: body.p_lastname,
+				m_lastname: body.m_lastname,
+				ci: body.ci,
+				email: body.email,
+				id_rol,
+			};
+			AddUserPersonalDB(user, (err) => {
+				callback(err, { msg: 'error to insert in database', err });
+			});
+		})
+		.catch((err) => {
+			callback(err, { msg: 'error to try encrypt password', err });
+		});
 };
 
 const AddUserPersonal = (req = request, res = response) => {
 	let body = req.body;
 	if (body) {
-		bcrypt
-			.hash(body.password, 10)
-			.then((hash) => {
-				let user = {
-					username: body.username,
-					password: hash,
-					first_names: body.first_names,
-					p_lastname: body.p_lastname,
-					m_lastname: body.m_lastname,
-					ci: body.ci,
-					email: body.email,
-				};
-				AddUserPersonalDB(user, (err) => {
-					if (err) {
-						res.status(409).json({
-							msg: 'error to insert in database',
-							err,
-						});
-					} else {
-						res.status(201).json({ msg: 'User add is success' });
-					}
-				});
-			})
-			.catch((err) => {
-				res.status(409).json({
-					msg: 'error to try encrypt password',
-					err,
-				});
-			});
+		addUser(body, 2, (err, obj) => {
+			if (err) {
+				res.status(409).json(obj);
+			} else {
+				res.status(201).json({ msg: 'User add is success' });
+			}
+		});
+	} else {
+		res.sendStatus(412);
+	}
+};
+
+const AddUserClient = (req = request, res = response) => {
+	let body = req.body;
+	if (body) {
+		addUser(body, 3, (err, obj) => {
+			if (err) {
+				res.status(409).json(obj);
+			} else {
+				res.status(201).json({ msg: 'User add is success' });
+			}
+		});
+	} else {
+		res.sendStatus(412);
 	}
 };
 
 const GetAllPersonnel = (req = request, res = response) => {
-	GetAllPersonnelDB((err, rows) => {
+	GetAllPersonnelDB(2, (err, rows) => {
+		if (err) {
+			res.sendStatus(500);
+		} else {
+			res.json({
+				msg: 'Get users is complete',
+				data: rows,
+			});
+		}
+	});
+};
+
+const GetAllClient = (req = request, res = response) => {
+	GetAllPersonnelDB(3, (err, rows) => {
 		if (err) {
 			res.sendStatus(500);
 		} else {
@@ -146,6 +181,8 @@ const UpdatePersonnelIsActive = (req = request, res = response) => {
 				});
 			}
 		});
+	} else {
+		res.sendStatus(412);
 	}
 };
 
@@ -162,6 +199,8 @@ const GetAccessModulePersonnel = (req = request, res = response) => {
 				res.json(rows);
 			}
 		});
+	} else {
+		res.sendStatus(412);
 	}
 };
 
@@ -178,6 +217,8 @@ const AddAccessModulePersonnel = (req = request, res = response) => {
 				res.sendStatus(200);
 			}
 		});
+	} else {
+		res.sendStatus(412);
 	}
 };
 
@@ -194,6 +235,48 @@ const DeleteAccessModulePersonnel = (req = request, res = response) => {
 				res.sendStatus(200);
 			}
 		});
+	} else {
+		res.sendStatus(412);
+	}
+};
+
+const AddBillClient = (req = request, res = response) => {
+	let body = req.body;
+	if (body) {
+		AddBillClientDB(body.id_user, (err) => {
+			//el id obtener del JWT
+			if (err) {
+				res.status(501).json({
+					msg: 'error to insert add bill client',
+					err,
+				});
+			} else {
+				res.sendStatus(200);
+			}
+		});
+	} else {
+		res.sendStatus(412);
+	}
+};
+
+const GetBillClientOpen = (req = request, res = response) => {
+	let uuid = jwt.decode(req.header('x-token'))?.uuid;
+	if (uuid && uuid?.id_user) {
+		GetBillClientDB(uuid.id_user, 1, 1, (err, rows) => {
+			if (err) {
+				res.status(501).json({
+					msg: 'error to get bill client open',
+					err,
+				});
+			} else {
+				res.status(200).json({
+					msg: 'get bill is successfull',
+					data: rows,
+				});
+			}
+		});
+	} else {
+		res.sendStatus(412);
 	}
 };
 
@@ -201,8 +284,12 @@ module.exports = {
 	LoginUsername,
 	AddUserPersonal,
 	GetAllPersonnel,
+	GetAllClient,
 	UpdatePersonnelIsActive,
 	GetAccessModulePersonnel,
 	AddAccessModulePersonnel,
 	DeleteAccessModulePersonnel,
+	AddUserClient,
+	AddBillClient,
+	GetBillClientOpen,
 };
