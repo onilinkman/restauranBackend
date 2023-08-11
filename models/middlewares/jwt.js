@@ -12,15 +12,18 @@ const validateJWT = (req = request, res = response, next) => {
 		});
 	}
 	try {
-		jwt.verify(token, PUBLICKEY);
+		const user = jwt.verify(token, PUBLICKEY);
+		req.user = user;
 		next();
 	} catch (error) {
 		res.status(401).json({
 			msg: 'error in token',
+			error,
 		});
 	}
 };
 
 module.exports = {
 	validateJWT,
+	PUBLICKEY,
 };

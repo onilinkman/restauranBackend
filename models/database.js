@@ -283,12 +283,102 @@ function CreateTableAccessModule() {
 	});
 }
 
+function CreateTable_TableRestaurant() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS table_restaurant(
+			id_table INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL UNIQUE,
+			coordinate TEXT,
+			state INTEGER DEFAULT 1,
+			is_active INTEGER DEFAULT 1
+		)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table_restaurant');
+				} else {
+					resolve('Table_restaurant is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableBillTable() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS bill_table(
+			id_bill_table INTEGER PRIMARY KEY AUTOINCREMENT,
+			id_table INTEGER NOT NULL,
+			note TEXT,
+			date TEXT DEFAULT (datetime('now')),
+			id_state INTEGER NOT NULL,
+			is_deleted INTEGER DEFAULT 1,
+			FOREIGN KEY (id_table)
+				REFERENCES table_restaurant(id_table),
+			FOREIGN KEY (id_state)
+				REFERENCES state_order (id_state)
+		)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table bill_table');
+				} else {
+					resolve('Table bill_table is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableFloors() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS floors(
+			id_floor INTEGER PRIMARY KEY AUTOINCREMENT,
+			title TEXT,
+			description TEXT
+		)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table floors');
+				} else {
+					resolve('Table floors is created');
+				}
+			}
+		);
+	});
+}
+
+function CreateTableFloorsTable() {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`CREATE TABLE IF NOT EXISTS floors_table(
+			id_floor INTEGER,
+			id_table INTEGER UNIQUE,
+			FOREIGN KEY (id_floor)
+				REFERENCES floors(id_floor),
+			FOREIGN KEY (id_table)
+				REFERENCES table_restaurant(id_table)
+		)`,
+			(err) => {
+				if (err) {
+					reject('Error to create table floors_table');
+				} else {
+					resolve('Table floors_table is created');
+				}
+			}
+		);
+	});
+}
+
 function CreateTableBillUser() {
 	return new Promise((resolve, reject) => {
 		db.run(
 			`CREATE TABLE IF NOT EXISTS bill_user(
 			id_bill_user INTEGER PRIMARY KEY AUTOINCREMENT,
 			id_user INTEGER NOT NULL,
+			id_table INTEGER,
+			note TEXT,
 			date TEXT DEFAULT (datetime('now')),
 			id_state INTEGER NOT NULL,
 			is_deleted INTEGER DEFAULT 1,
@@ -296,6 +386,8 @@ function CreateTableBillUser() {
 				REFERENCES user (id_user),
 			FOREIGN KEY (id_state)
 				REFERENCES state_order (id_state)
+			FOREIGN KEY (id_table)
+				REFERENCES table_restaurant(id_table)
 			)`,
 			(err) => {
 				if (err) {
@@ -338,13 +430,17 @@ function CreateTableBillClient() {
 			`CREATE TABLE IF NOT EXISTS bill_client(
 			id_bill_client INTEGER PRIMARY KEY AUTOINCREMENT,
 			id_user INTEGER NOT NULL,
+			id_table INTEGER,
+			note TEXT,
 			date TEXT DEFAULT (datetime('now')),
 			id_state INTEGER NOT NULL,
 			is_deleted INTEGER DEFAULT 1,
 			FOREIGN KEY (id_user)
 				REFERENCES user (id_user),
 			FOREIGN KEY (id_state)
-				REFERENCES state_order (id_state)
+				REFERENCES state_order (id_state),
+			FOREIGN KEY (id_table)
+				REFERENCES table_restaurant (id_table)
 			)`,
 			(err) => {
 				if (err) {
@@ -455,6 +551,22 @@ function launchCreateUserModule() {
 		.then((result) => {
 			console.log(result);
 			return CreateTableAccessModule();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTable_TableRestaurant();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableBillTable();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableFloors();
+		})
+		.then((result) => {
+			console.log(result);
+			return CreateTableFloorsTable();
 		})
 		.then((result) => {
 			console.log(result);

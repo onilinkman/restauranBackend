@@ -7,6 +7,10 @@ const fileUpload = require('express-fileupload');
 const { InitDB } = require('./database');
 const { GetIP } = require('./dataSo');
 const { validateJWT } = require('./middlewares/jwt');
+const {
+	autorizePersonal,
+	autorizeMesa,
+} = require('./middlewares/authentication');
 const { UploadFile, GetMenu, GetRecetas, UpdateImage } = require('./uploads');
 const {
 	PostSection,
@@ -26,6 +30,9 @@ const {
 } = require('./api/kitchen');
 
 const { GetIdsMenuBySection } = require('./api/menu');
+
+const { AddMesa, AddFloor, AddFloorsTable } = require('./api/mesas');
+
 const {
 	LoginUsername,
 	AddUserPersonal,
@@ -109,10 +116,22 @@ class Server {
 		this.app.delete('/api/deleteItem', DeleteItem);
 		//ENDPOINT FOR MENU
 		this.app.get('/api/getIdsMenuBySection', GetIdsMenuBySection);
+		//ENDPOINT FOR MESAS
+		this.app.post('/api/addMesa', [validateJWT, autorizeMesa, AddMesa]);
+		this.app.post('/api/addFloor', [validateJWT, autorizeMesa, AddFloor]);
+		this.app.post('/api/addFloorsTable', [
+			validateJWT,
+			autorizeMesa,
+			AddFloorsTable,
+		]);
 		//ENDPOINT FOR USERS
 		this.app.post('/api/auth/login', [LoginUsername]);
 		this.app.post('/api/addUserPersonal', [validateJWT, AddUserPersonal]);
-		this.app.get('/api/v1/getPersonnel', [validateJWT, GetAllPersonnel]);
+		this.app.get('/api/v1/getPersonnel', [
+			validateJWT,
+			autorizePersonal,
+			GetAllPersonnel,
+		]);
 		this.app.post('/api/updatePersonnelIsActive', [
 			validateJWT,
 			UpdatePersonnelIsActive,
